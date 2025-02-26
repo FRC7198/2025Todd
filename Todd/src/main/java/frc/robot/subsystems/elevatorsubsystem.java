@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -10,6 +11,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -24,17 +26,22 @@ public class Elevatorsubsystem extends SubsystemBase {
 
     public ElevatorState currentElevatorState = ElevatorState.IDLE;
 
-    private SparkMax elevationMotor;
+    private SparkMax elevatorMotor;
     private SparkMaxConfig elevationMotorConfig;
     private SparkClosedLoopController closedLoopController;
-    private AbsoluteEncoder encoder;
+    private DigitalInput topLimitSwitch;
+    private DigitalInput bottomLimitSwitch;
+    private double targetPosition;
+    private RelativeEncoder elevatorEncoder;
+
+
 
     public Elevatorsubsystem() {
 
-        elevationMotor = new SparkMax(ElevatorConstants.ELEVATION_MOTOR_ID, MotorType.kBrushless);
-        closedLoopController = elevationMotor.getClosedLoopController();
+        elevatorMotor = new SparkMax(ElevatorConstants.ELEVATION_MOTOR_ID, MotorType.kBrushless);
+        elevatorEncoder = elevatorMotor.getEncoder();
+        closedLoopController = elevatorMotor.getClosedLoopController();
         elevationMotorConfig = new SparkMaxConfig();
-        encoder = elevationMotor.getAbsoluteEncoder();
         currentElevatorState = ElevatorState.IDLE;
 
          /*
@@ -76,7 +83,7 @@ public class Elevatorsubsystem extends SubsystemBase {
         * the SPARK MAX loses power. This is useful for power cycles that may occur
         * mid-operation.
         */
-        elevationMotor.configure(elevationMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorMotor.configure(elevationMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         // Initialize dashboard values
         SmartDashboard.setDefaultNumber("Target Position", 0);
@@ -85,16 +92,40 @@ public class Elevatorsubsystem extends SubsystemBase {
         SmartDashboard.setDefaultBoolean("Reset Encoder", false);
     }
 
-    public boolean RaiseElevator() {
-
-        currentElevatorState = ElevatorState.RAISING;
-        return true;
+    @Override
+    public void periodic() {
+        // Stop motor if limit switch is triggered
+        if (topLimitSwitch.get() && elevatorMotor.get() > 0) {
+            stop();
+        } else if (bottomLimitSwitch.get() && elevatorMotor.get() < 0) {
+            stop();
+        } else {
+            // Move towards target position
+            double error = targetPosition - elevatorEncoder.getPosition();
+            elevatorMotor.set(0.1 * error); // Adjust speed as needed
+        }
     }
 
-    public boolean LowerElevator() {
 
-        currentElevatorState = ElevatorState.DESCENDING;
-        return true;
+    public void setTargetPosition(double position) {
+        targetPosition = position;
     }
+
+    public void stop() {
+        elevatorMotor.set(0);
+    }
+
+    public double getPosition() {
+        return elevatorEncoder.getPosition();
+    }
+
+    public boolean isAtTop() {
+        return topLimitSwitch.get();
+    }
+
+    public boolean isAtBottom() {
+        return bottomLimitSwitch.get();
+    }
+
 
 }
