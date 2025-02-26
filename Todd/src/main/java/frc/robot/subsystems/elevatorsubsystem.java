@@ -101,8 +101,8 @@ public class Elevatorsubsystem extends SubsystemBase {
             stop();
         } else {
             // Move towards target position
-            double error = targetPosition - elevatorEncoder.getPosition();
-            elevatorMotor.set(0.1 * error); // Adjust speed as needed
+            double position = targetPosition - elevatorEncoder.getPosition();
+            elevatorMotor.set(0.1 * position); // Adjust speed as needed
         }
     }
 
