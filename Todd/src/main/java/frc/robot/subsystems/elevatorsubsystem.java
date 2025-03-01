@@ -95,15 +95,25 @@ public class Elevatorsubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Stop motor if limit switch is triggered
-        if (topLimitSwitch.get() && elevatorMotor.get() > 0) {
+        double speed = 0;
+        if ( elevatorMotor.get() > 0) {
             stop();
-        } else if (bottomLimitSwitch.get() && elevatorMotor.get() < 0) {
+        } else if ( elevatorMotor.get() < 0) {
             stop();
         } else {
             // Move towards target position
             double position = targetPosition - elevatorEncoder.getPosition();
-            elevatorMotor.set(0.1 * position); // Adjust speed as needed
+            if (position > 0)
+            {
+                speed = -0.1;
+            } else if (position < 0) {
+                speed = 0.1;
+            }
+            elevatorMotor.set(speed); // Adjust speed as needed
         }
+        SmartDashboard.putNumber("elevatorspeed", speed);
+        SmartDashboard.putNumber("targetposition", targetPosition);
+        SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
     }
 
 

@@ -107,7 +107,10 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
     // Configure the trigger bindings
     configureBindings(); 
     DriverStation.silenceJoystickConnectionWarning(true);
-    NamedCommands.registerCommand("test", Commands.print("I EXIST"));  }
+    NamedCommands.registerCommand("test", Commands.print("I EXIST"));  
+    elevatorsubsystem.setTargetPosition(Constants.ElevatorConstants.ELEVATOR_START_POSITION);
+
+  }
 
 
   /**
@@ -189,10 +192,10 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
   }
 
   private void mapOperatorController() {
-    Command goToBottom = new goToSpecificHeight(elevatorsubsystem, 0);    
-    Command goToL1 = new goToSpecificHeight(elevatorsubsystem, 10);
-    Command goToL2 = new goToSpecificHeight(elevatorsubsystem, 20);
-    Command goToL3 = new goToSpecificHeight(elevatorsubsystem, 30);
+    Command goToBottom = new goToSpecificHeight(elevatorsubsystem, 300);    
+    Command goToL1 = new goToSpecificHeight(elevatorsubsystem, 200);
+    Command goToL2 = new goToSpecificHeight(elevatorsubsystem, 100);
+    Command goToL3 = new goToSpecificHeight(elevatorsubsystem, 0);
 
     m_operatorController.a().whileTrue(goToBottom);
     m_operatorController.x().whileTrue(goToL1);

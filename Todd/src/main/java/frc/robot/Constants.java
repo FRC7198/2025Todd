@@ -34,6 +34,7 @@ public final class Constants {
   public static final class ElevatorConstants {
 
     public static final int ELEVATION_MOTOR_ID = 30;
+    public static final double ELEVATOR_START_POSITION = 300;
   
   }
 
