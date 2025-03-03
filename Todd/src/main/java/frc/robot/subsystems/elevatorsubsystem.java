@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class Elevatorsubsystem extends SubsystemBase {
@@ -30,7 +31,7 @@ public class Elevatorsubsystem extends SubsystemBase {
     private SparkMaxConfig elevationMotorConfig;
     private SparkClosedLoopController closedLoopController;
     private DigitalInput topLimitSwitch;
-    private DigitalInput bottomLimitSwitch;
+    private DigitalInput bottomLimitSwitch = new DigitalInput(0);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
 
@@ -96,18 +97,18 @@ public class Elevatorsubsystem extends SubsystemBase {
     public void periodic() {
         // Stop motor if limit switch is triggered
         double speed = 0;
-        if ( elevatorMotor.get() > 0) {
+        if (isAtTop()) {
             stop();
-        } else if ( elevatorMotor.get() < 0) {
+        } else if (isAtBottom()) {
             stop();
         } else {
             // Move towards target position
             double position = targetPosition - elevatorEncoder.getPosition();
             if (position > 0)
             {
-                speed = -0.1;
-            } else if (position < 0) {
                 speed = 0.1;
+            } else if (position < 0) {
+                speed = -0.1;
             }
             elevatorMotor.set(speed); // Adjust speed as needed
         }
@@ -130,11 +131,15 @@ public class Elevatorsubsystem extends SubsystemBase {
     }
 
     public boolean isAtTop() {
-        return topLimitSwitch.get();
+        if (topLimitSwitch == null)
+        {
+            return topLimitSwitch.get() || elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
+        }
+        return elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
     }
 
     public boolean isAtBottom() {
-        return bottomLimitSwitch.get();
+        return bottomLimitSwitch.get() || elevatorMotor.get() >= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
     }
 
 
