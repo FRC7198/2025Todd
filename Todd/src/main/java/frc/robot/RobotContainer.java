@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.elevator.goToSpecificHeight;
+import frc.robot.subsystems.Elevatorsubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.swervedrive.*;
 import swervelib.SwerveInputStream;
@@ -42,11 +44,13 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandXboxController m_driverController = new CommandXboxController(0);
+  final CommandXboxController m_operatorController = new CommandXboxController(1);
     // Replace with CommandPS4Controller or CommandJoystick if needed
     // The robot's subsystems and commands are defined here...
     private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
     "swerve/neo"));
 
+    private final Elevatorsubsystem elevatorsubsystem = new Elevatorsubsystem();
 /**
 * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
 */
@@ -103,7 +107,10 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
     // Configure the trigger bindings
     configureBindings(); 
     DriverStation.silenceJoystickConnectionWarning(true);
-    NamedCommands.registerCommand("test", Commands.print("I EXIST"));  }
+    NamedCommands.registerCommand("test", Commands.print("I EXIST"));  
+    elevatorsubsystem.setTargetPosition(Constants.ElevatorConstants.ELEVATOR_START_POSITION);
+
+  }
 
 
   /**
@@ -164,6 +171,8 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
         m_driverController.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         m_driverController.rightBumper().onTrue(Commands.none());
       }
+
+      mapOperatorController();
   }
 
   /**
@@ -182,5 +191,16 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
     drivebase.setMotorBrake(brake);
   }
 
+  private void mapOperatorController() {
+    Command goToBottom = new goToSpecificHeight(elevatorsubsystem, 300);    
+    Command goToL1 = new goToSpecificHeight(elevatorsubsystem, 200);
+    Command goToL2 = new goToSpecificHeight(elevatorsubsystem, 100);
+    Command goToL3 = new goToSpecificHeight(elevatorsubsystem, 0);
+
+    m_operatorController.a().whileTrue(goToBottom);
+    m_operatorController.x().whileTrue(goToL1);
+    m_operatorController.y().whileTrue(goToL2);
+    m_operatorController.b().whileTrue(goToL3);
+  }
   
 }
