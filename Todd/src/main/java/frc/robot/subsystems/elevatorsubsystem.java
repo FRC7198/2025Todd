@@ -10,7 +10,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
+import java.math.BigDecimal;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,7 +30,7 @@ public class Elevatorsubsystem extends SubsystemBase {
     private SparkMax elevatorMotor;
     private SparkMaxConfig elevationMotorConfig;
     private SparkClosedLoopController closedLoopController;
-    private DigitalInput topLimitSwitch;
+    //private DigitalInput topLimitSwitch = new DigitalInput(0);
     private DigitalInput bottomLimitSwitch = new DigitalInput(0);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
@@ -96,25 +96,31 @@ public class Elevatorsubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Stop motor if limit switch is triggered
-        double speed = 0;
+        BigDecimal speed = new BigDecimal(0.0);
         if (isAtTop()) {
             stop();
         } else if (isAtBottom()) {
             stop();
         } else {
             // Move towards target position
-            double position = targetPosition - elevatorEncoder.getPosition();
-            if (position > 0)
+            double workingPosition = targetPosition - elevatorEncoder.getPosition();
+            SmartDashboard.putNumber("workingPosition", workingPosition);
+            if (workingPosition < 0)
             {
-                speed = 0.1;
-            } else if (position < 0) {
-                speed = -0.1;
+                speed = BigDecimal.valueOf(-0.1);
+            } else if (workingPosition > 0) {
+                speed = BigDecimal.valueOf(0.1);
+            } else if (workingPosition == 0) {
+                stop();
             }
-            elevatorMotor.set(speed); // Adjust speed as needed
+            elevatorMotor.set(speed.doubleValue()); // Adjust speed as needed
         }
-        SmartDashboard.putNumber("elevatorspeed", speed);
+        SmartDashboard.putNumber("elevatorspeed", speed.doubleValue());
         SmartDashboard.putNumber("targetposition", targetPosition);
         SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
+        SmartDashboard.putBoolean("isattop", isAtTop());
+        SmartDashboard.putBoolean("isatbottom", isAtBottom());
+        
     }
 
 
@@ -131,15 +137,15 @@ public class Elevatorsubsystem extends SubsystemBase {
     }
 
     public boolean isAtTop() {
-        if (topLimitSwitch == null)
-        {
-            return topLimitSwitch.get() || elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
-        }
-        return elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
+        //if (topLimitSwitch == null)
+        //{
+           //return topLimitSwitch.get() || elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
+        //}
+        return elevatorMotor.get() > targetPosition;
     }
 
     public boolean isAtBottom() {
-        return bottomLimitSwitch.get() || elevatorMotor.get() >= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
+        return bottomLimitSwitch.get() && elevatorMotor.get() < targetPosition;
     }
 
 
