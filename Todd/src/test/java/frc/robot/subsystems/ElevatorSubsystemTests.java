@@ -5,7 +5,6 @@ import frc.robot.subsystems.Elevatorsubsystem;
 import org.junit.jupiter.api.Test;
 
 public class ElevatorSubsystemTests {
-    
 
     private Elevatorsubsystem elevatorsubsystem;
 
@@ -19,9 +18,8 @@ public class ElevatorSubsystemTests {
         elevatorsubsystem.setTargetPosition(Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION);
 
         double speed = elevatorsubsystem.calculateElevatorMotorSpeed(0);
-
         assertEquals(0, speed);
+
+        
     }
 }
-
-
