@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
-public class Elevatorsubsystem extends SubsystemBase {
+public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
     public enum ElevatorState {
         RAISING,
@@ -28,8 +28,6 @@ public class Elevatorsubsystem extends SubsystemBase {
     public ElevatorState currentElevatorState = ElevatorState.IDLE;
 
     private SparkMax elevatorMotor;
-    private SparkMaxConfig elevationMotorConfig;
-    private SparkClosedLoopController closedLoopController;
     // private DigitalInput topLimitSwitch = new DigitalInput(0);
     private DigitalInput bottomLimitSwitch = new DigitalInput(0);
     private double targetPosition;
@@ -39,50 +37,7 @@ public class Elevatorsubsystem extends SubsystemBase {
 
         elevatorMotor = new SparkMax(ElevatorConstants.ELEVATION_MOTOR_ID, MotorType.kBrushless);
         elevatorEncoder = elevatorMotor.getEncoder();
-        closedLoopController = elevatorMotor.getClosedLoopController();
-        elevationMotorConfig = new SparkMaxConfig();
         currentElevatorState = ElevatorState.IDLE;
-
-        /*
-         * Configure the encoder. For this specific example, we are using the
-         * integrated encoder of the NEO, and we don't need to configure it. If
-         * needed, we can adjust values like the position or velocity conversion
-         * factors.
-         */
-        elevationMotorConfig.encoder
-                .positionConversionFactor(1)
-                .velocityConversionFactor(1);
-
-        /*
-         * Configure the closed loop controller. We want to make sure we set the
-         * feedback sensor as the primary encoder.
-         */
-        elevationMotorConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                // Set PID values for position control. We don't need to pass a closed loop
-                // slot, as it will default to slot 0.
-                .p(0.1)
-                .i(0)
-                .d(0)
-                .outputRange(-1, 1)
-                // Set PID values for velocity control in slot 1
-                .p(0.0001, ClosedLoopSlot.kSlot1)
-                .i(0, ClosedLoopSlot.kSlot1)
-                .d(0, ClosedLoopSlot.kSlot1)
-                .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
-                .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
-
-        /*
-         * Apply the configuration to the SPARK MAX.
-         *
-         * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-         * is useful in case the SPARK MAX is replaced.
-         *
-         * kPersistParameters is used to ensure the configuration is not lost when
-         * the SPARK MAX loses power. This is useful for power cycles that may occur
-         * mid-operation.
-         */
-        elevatorMotor.configure(elevationMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         // Initialize dashboard values
         SmartDashboard.setDefaultNumber("Target Position", 0);
@@ -156,6 +111,12 @@ public class Elevatorsubsystem extends SubsystemBase {
 
     public boolean isAtBottom() {
         return bottomLimitSwitch.get() && elevatorMotor.get() < targetPosition;
+    }
+
+    @Override
+    public void close()  {
+        elevatorMotor.close();
+        bottomLimitSwitch.close();
     }
 
 }
