@@ -37,7 +37,7 @@ public class ElevatorSubsystemTests {
     @MethodSource("speedCalculationsTestCases")
     public void SpeedTest(double encoderPosition, double target, double expectedSpeed) {
         elevatorsubsystem.setTargetPosition(target);
-        double speed = elevatorsubsystem.calculateElevatorMotorSpeed(encoderPosition);
+        double speed = elevatorsubsystem.calculateElevatorMotorSpeed(encoderPosition, false, false);
         logger.log(Level.INFO,String.format("Speed is {0} but expected {1}", speed, expectedSpeed));
         assertEquals(expectedSpeed, speed);
     }
