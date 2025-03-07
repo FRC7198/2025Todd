@@ -84,12 +84,12 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
             // do we need to go up to get to the target position and are we farther away than 1 encoder pulse?
             if (encoderPosition < targetPosition &&  Math.abs(workingPosition) < 1)
             {
-                // Go Down
+                // Go Up
                 speed = BigDecimal.valueOf(-0.1);
 
             // Are we above where we need to go and are we farther away than one encoder pulse?
             } else if (encoderPosition > targetPosition && Math.abs(workingPosition) < 1) {
-                // Go Up
+                // Go Down
                 speed = BigDecimal.valueOf(0.1);
             } else if( Math.abs(workingPosition) < 1) {
                 return 0;
