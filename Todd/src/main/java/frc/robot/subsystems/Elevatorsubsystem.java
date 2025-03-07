@@ -82,13 +82,13 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
             double workingPosition = targetPosition - encoderPosition;
             SmartDashboard.putNumber("workingPosition", workingPosition);
             // Are we above where we need to go and are we farther away than one encoder pulse?
-            if (encoderPosition < targetPosition &&  Math.abs(workingPosition) < 1)
+            if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
             {
                 // Go Down
                 speed = BigDecimal.valueOf(0.1);
                 
             //Are we below we we need to go and are we farther away than 1 encoder pulse?
-            } else if (encoderPosition > targetPosition && Math.abs(workingPosition) < 1) {
+            } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > 1) {
                 // Go Up
                 speed = BigDecimal.valueOf(-0.1);
             } else if( Math.abs(workingPosition) < 1) {
