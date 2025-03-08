@@ -141,7 +141,7 @@ SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.co
         drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
       } else
       {
-        drivebase.setDefaultCommand(driveSetpointGen);
+        drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
       }
   
       if (Robot.isSimulation())
