@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,19 +16,23 @@ public class LEDSubsystem extends SubsystemBase {
   private final AddressableLED m_led;
   private final AddressableLEDBuffer m_buffer;
 
+  // Create an LED pattern that sets the entire strip to solid red
+  LEDPattern red = LEDPattern.solid(Color.kRed);
+  LEDPattern blue = LEDPattern.solid(Color.kGreen); //wires are swapped so green is actually blue
+
   // https://docs.wpilib.org/en/stable/docs/software/hardware-apis/misc/addressable-leds.html
   public LEDSubsystem() {
-    m_led = new AddressableLED(kPort);
+    m_led = new AddressableLED(9);
     m_buffer = new AddressableLEDBuffer(kLength);
     m_led.setLength(kLength);
     m_led.start();
 
-    // Create an LED pattern that sets the entire strip to solid red
-    LEDPattern red = LEDPattern.solid(Color.kRed);
-
     // Apply the LED pattern to the data buffer
-    red.applyTo(m_buffer);
-
+    if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red) {
+      red.applyTo(m_buffer);
+    } else {
+      blue.applyTo(m_buffer);
+    }
     // Set the default command to turn the strip off, otherwise the last colors
     // written by
     // the last command to run will continue to be displayed.
@@ -37,6 +43,8 @@ public class LEDSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+
     // Periodically send the latest LED color data to the LED strip for it to
     // display
     m_led.setData(m_buffer);
