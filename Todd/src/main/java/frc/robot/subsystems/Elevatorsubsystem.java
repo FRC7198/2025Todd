@@ -1,23 +1,23 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import java.math.BigDecimal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
-public class Elevatorsubsystem extends SubsystemBase {
+
+
+public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
+
+    Logger logger = Logger.getLogger(Elevatorsubsystem.class.getName());
 
     public enum ElevatorState {
         RAISING,
@@ -28,63 +28,16 @@ public class Elevatorsubsystem extends SubsystemBase {
     public ElevatorState currentElevatorState = ElevatorState.IDLE;
 
     private SparkMax elevatorMotor;
-    private SparkMaxConfig elevationMotorConfig;
-    private SparkClosedLoopController closedLoopController;
-    //private DigitalInput topLimitSwitch = new DigitalInput(0);
+    // private DigitalInput topLimitSwitch = new DigitalInput(0);
     private DigitalInput bottomLimitSwitch = new DigitalInput(0);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
-
-
 
     public Elevatorsubsystem() {
 
         elevatorMotor = new SparkMax(ElevatorConstants.ELEVATION_MOTOR_ID, MotorType.kBrushless);
         elevatorEncoder = elevatorMotor.getEncoder();
-        closedLoopController = elevatorMotor.getClosedLoopController();
-        elevationMotorConfig = new SparkMaxConfig();
         currentElevatorState = ElevatorState.IDLE;
-
-         /*
-        * Configure the encoder. For this specific example, we are using the
-        * integrated encoder of the NEO, and we don't need to configure it. If
-        * needed, we can adjust values like the position or velocity conversion
-        * factors.
-        */
-        elevationMotorConfig.encoder
-        .positionConversionFactor(1)
-        .velocityConversionFactor(1);
-
-        /*
-        * Configure the closed loop controller. We want to make sure we set the
-        * feedback sensor as the primary encoder.
-        */
-        elevationMotorConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            // Set PID values for position control. We don't need to pass a closed loop
-            // slot, as it will default to slot 0.
-            .p(0.1)
-            .i(0)
-            .d(0)
-            .outputRange(-1, 1)
-            // Set PID values for velocity control in slot 1
-            .p(0.0001, ClosedLoopSlot.kSlot1)
-            .i(0, ClosedLoopSlot.kSlot1)
-            .d(0, ClosedLoopSlot.kSlot1)
-            .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
-            .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
-
-        /*
-        * Apply the configuration to the SPARK MAX.
-        *
-        * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-        * is useful in case the SPARK MAX is replaced.
-        *
-        * kPersistParameters is used to ensure the configuration is not lost when
-        * the SPARK MAX loses power. This is useful for power cycles that may occur
-        * mid-operation.
-        */
-        elevatorMotor.configure(elevationMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         // Initialize dashboard values
         SmartDashboard.setDefaultNumber("Target Position", 0);
@@ -95,34 +48,60 @@ public class Elevatorsubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Stop motor if limit switch is triggered
-        BigDecimal speed = new BigDecimal(0.0);
-        if (isAtTop()) {
-            stop();
-        } else if (isAtBottom()) {
+
+        Double speed = calculateElevatorMotorSpeed(elevatorEncoder.getPosition(), false, false);
+        if (speed == 0) {
             stop();
         } else {
-            // Move towards target position
-            double workingPosition = targetPosition - elevatorEncoder.getPosition();
-            SmartDashboard.putNumber("workingPosition", workingPosition);
-            if (workingPosition < 0)
-            {
-                speed = BigDecimal.valueOf(-0.1);
-            } else if (workingPosition > 0) {
-                speed = BigDecimal.valueOf(0.1);
-            } else if (workingPosition == 0) {
-                stop();
-            }
-            elevatorMotor.set(speed.doubleValue()); // Adjust speed as needed
+            elevatorMotor.set(speed); // Adjust speed as needed
         }
-        SmartDashboard.putNumber("elevatorspeed", speed.doubleValue());
+
+        SmartDashboard.putNumber("elevatorspeed", speed);
         SmartDashboard.putNumber("targetposition", targetPosition);
         SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
-        SmartDashboard.putBoolean("isattop", isAtTop());
-        SmartDashboard.putBoolean("isatbottom", isAtBottom());
-        
+        SmartDashboard.putBoolean("isattop", isAtTop(elevatorEncoder.getPosition(), false));
+        SmartDashboard.putBoolean("isatbottom", isAtBottom(elevatorEncoder.getPosition(), false));
+
     }
 
+    public double calculateElevatorMotorSpeed(double encoderPosition, boolean topLimitSwitch, boolean bottomLimitSwitch) { 
+        
+        // Stop motor if limit switch is triggered
+        BigDecimal speed = new BigDecimal(0.0);
+        logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
+
+
+        //Are we at the highest elevator point according to the encoder or have we tripped the top limit switch
+        if (isAtTop(encoderPosition, topLimitSwitch)) {
+            return 0;
+        //Are we at the lowest elevator point according to the encoder or have we tripped the bottom limit switch
+        } else if (isAtBottom(encoderPosition, bottomLimitSwitch)) {
+            return 0;
+        } else {
+            // Move towards target position
+
+            //work out how far from the position we want to go is
+            double workingPosition = targetPosition - encoderPosition;
+            SmartDashboard.putNumber("workingPosition", workingPosition);
+            logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
+            // Are we above where we need to go and are we farther away than one encoder pulse?
+            if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
+            {
+                logger.log(Level.INFO,String.format("Go Up"));
+                // Go Up
+                speed = BigDecimal.valueOf(0.1);
+                
+            //Are we below we we need to go and are we farther away than 1 encoder pulse?
+            } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > 1) {
+                // Go Up
+                speed = BigDecimal.valueOf(-0.1);
+            } else if(Math.abs(workingPosition) < 1) {
+                logger.log(Level.INFO,String.format("We are close so stop"));
+                return 0;
+            }
+            return speed.doubleValue();
+        }
+    }
 
     public void setTargetPosition(double position) {
         targetPosition = position;
@@ -136,17 +115,27 @@ public class Elevatorsubsystem extends SubsystemBase {
         return elevatorEncoder.getPosition();
     }
 
-    public boolean isAtTop() {
-        //if (topLimitSwitch == null)
-        //{
-           //return topLimitSwitch.get() || elevatorMotor.get() <= Constants.ElevatorConstants.ELEVATOR_L3;
-        //}
-        return elevatorMotor.get() > targetPosition;
+    public boolean isAtTop(double encoderPosition, boolean topLimitSwitch) {
+        // if (topLimitSwitch == null)
+        // {
+        // return topLimitSwitch.get() || elevatorMotor.get() <=
+        // Constants.ElevatorConstants.ELEVATOR_L3;
+        // }
+        Boolean isAtTop = encoderPosition < Constants.ElevatorConstants.ELEVATOR_L3;
+        logger.log(Level.INFO,String.format("isAtTop: "+ isAtTop.toString()));
+        return isAtTop;
     }
 
-    public boolean isAtBottom() {
-        return bottomLimitSwitch.get() && elevatorMotor.get() < targetPosition;
+    public boolean isAtBottom(double encoderPosition, boolean bottomLimitSwitch) {
+        Boolean isAtBottom = encoderPosition > Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
+        logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
+        return isAtBottom;
     }
 
+    @Override
+    public void close()  {
+        elevatorMotor.close();
+        bottomLimitSwitch.close();
+    }
 
 }
