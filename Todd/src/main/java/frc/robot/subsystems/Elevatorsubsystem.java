@@ -68,6 +68,8 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         
         // Stop motor if limit switch is triggered
         BigDecimal speed = new BigDecimal(0.0);
+        logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
+
 
         //Are we at the highest elevator point according to the encoder or have we tripped the top limit switch
         if (isAtTop(encoderPosition, topLimitSwitch)) {
@@ -81,17 +83,20 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
             //work out how far from the position we want to go is
             double workingPosition = targetPosition - encoderPosition;
             SmartDashboard.putNumber("workingPosition", workingPosition);
+            logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
             // Are we above where we need to go and are we farther away than one encoder pulse?
             if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
             {
-                // Go Down
+                logger.log(Level.INFO,String.format("Go Up"));
+                // Go Up
                 speed = BigDecimal.valueOf(0.1);
                 
             //Are we below we we need to go and are we farther away than 1 encoder pulse?
             } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > 1) {
                 // Go Up
                 speed = BigDecimal.valueOf(-0.1);
-            } else if( Math.abs(workingPosition) < 1) {
+            } else if(Math.abs(workingPosition) < 1) {
+                logger.log(Level.INFO,String.format("We are close so stop"));
                 return 0;
             }
             return speed.doubleValue();
