@@ -4,8 +4,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+// import java.util.logging.Level;
+// import java.util.logging.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,7 +17,7 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
-    Logger logger = Logger.getLogger(Elevatorsubsystem.class.getName());
+    // Logger logger = Logger.getLogger(Elevatorsubsystem.class.getName());
 
     public enum ElevatorState {
         RAISING,
@@ -68,7 +68,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         
         // Stop motor if limit switch is triggered
         BigDecimal speed = new BigDecimal(0.0);
-        logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
+        // logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
 
 
         //Are we at the highest elevator point according to the encoder or have we tripped the top limit switch
@@ -83,11 +83,11 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
             //work out how far from the position we want to go is
             double workingPosition = targetPosition - encoderPosition;
             SmartDashboard.putNumber("workingPosition", workingPosition);
-            logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
+            // logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
             // Are we above where we need to go and are we farther away than one encoder pulse?
             if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
             {
-                logger.log(Level.INFO,String.format("Go Up"));
+                // logger.log(Level.INFO,String.format("Go Up"));
                 // Go Up
                 speed = BigDecimal.valueOf(0.1);
                 
@@ -96,7 +96,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
                 // Go Up
                 speed = BigDecimal.valueOf(-0.1);
             } else if(Math.abs(workingPosition) < 1) {
-                logger.log(Level.INFO,String.format("We are close so stop"));
+                // logger.log(Level.INFO,String.format("We are close so stop"));
                 return 0;
             }
             return speed.doubleValue();
@@ -122,13 +122,13 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         // Constants.ElevatorConstants.ELEVATOR_L3;
         // }
         Boolean isAtTop = encoderPosition < Constants.ElevatorConstants.ELEVATOR_L3;
-        logger.log(Level.INFO,String.format("isAtTop: "+ isAtTop.toString()));
+        // logger.log(Level.INFO,String.format("isAtTop: "+ isAtTop.toString()));
         return isAtTop;
     }
 
     public boolean isAtBottom(double encoderPosition, boolean bottomLimitSwitch) {
         Boolean isAtBottom = encoderPosition > Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
-        logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
+        // logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
         return isAtBottom;
     }
 

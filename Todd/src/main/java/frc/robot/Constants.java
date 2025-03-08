@@ -47,7 +47,7 @@ public final class Constants {
   public static final class FlipperConstants {
     public static final int FLIPPER_MOTOR_ID = 31;
     public static final double FLIPPER_STARTING_POSITION = 0;
-    public static final double FLIPPER_TILT_POSITION = 10;
+    public static final double FLIPPER_TILT_POSITION = 1.07;
     public static final BigDecimal FLIPPER_MOTOR_FORWARD_SPEED = new BigDecimal(.1);
     public static final BigDecimal FLIPPER_MOTOR_BACK_SPEED = new BigDecimal(-.1);
   }
