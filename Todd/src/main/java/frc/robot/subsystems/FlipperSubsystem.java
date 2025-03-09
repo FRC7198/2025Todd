@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.math.BigDecimal;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -8,16 +9,17 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.FlipperConstants;
 import frc.robot.commands.FlipCommand;
 
-public class FlipperSubsystem extends SubsystemBase {
+public class FlipperSubsystem extends SubsystemBase implements AutoCloseable {
 
     private SparkMax flipperMotor;
     private RelativeEncoder flipperEncoder;
     private FlipperState flipperState = FlipperState.RESET;
     private boolean shouldBeFlipping = false;
 
-    private enum FlipperState {
+    public enum FlipperState {
         FLIPPING, // flipping the tongue out
         RETURNING, // moving back to reset position
         RESET // down and waiting to be flipped again
@@ -28,12 +30,28 @@ public class FlipperSubsystem extends SubsystemBase {
         flipperEncoder = flipperMotor.getEncoder();
     }
 
+    public FlipperState getFlipperState() {
+        return flipperState;
+    }
+
+    public void setFlipperState(FlipperState flipperState) {
+        this.flipperState = flipperState;
+    }
+
+    public boolean getIsInFlipCycle() {
+        return shouldBeFlipping;
+    }
+
     @Override
     public void periodic() {
 
+        //if we are not in a flip command no need to calculcate speed
+        if (!shouldBeFlipping) {
+            return;
+        }
         // This method will be called once per scheduler run
         double flipperMotorSpeed = flip(flipperEncoder.getPosition());
-        if(flipperMotorSpeed == 0) {
+        if (flipperMotorSpeed == 0) {
             flipperMotor.stopMotor();
         } else {
             flipperMotor.set(flipperMotorSpeed);
@@ -46,49 +64,47 @@ public class FlipperSubsystem extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    // 
+    //
     public double flip(double flipperPosition) {
 
-        if(!shouldBeFlipping) {
-            return 0; // we shouldn't be flipping stop us 
+        if (!shouldBeFlipping) {
+            return 0; // we shouldn't be flipping stop us
         }
-        //if we are in the reset position
-        if(flipperState == FlipperState.RESET) {
 
-            // as we've been told to flip begin flipping the flipper
-            flipperState = FlipperState.FLIPPING;
-            return Constants.FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue();
-
-        } else if(flipperState == FlipperState.FLIPPING) {
-
-            // have we finsihed moving to the flipped position
-            if(flipperPosition >= Constants.FlipperConstants.FLIPPER_TILT_POSITION) {
-                //if so then have us start moving back
-                //TODO: set the flipperstate and set the speed to run the motor backwards
-                return 0; //TODO to be removed
-            } else {
-                //TODO continue flipping by running the motor forwards
-                return 0; //TODO to be removed
-            }
-
-        } else if( flipperState == FlipperState.RETURNING) {
-            // have we finsihed moving to the flipped position
-            if(flipperPosition <= Constants.FlipperConstants.FLIPPER_STARTING_POSITION) {
-                //if so then stop and we should be reset
+        switch (flipperState) {
+            // if we are in the reset position
+            case RESET:
+                // as we've been told to flip begin flipping the flipper
+                flipperState = FlipperState.FLIPPING;
+                return Constants.FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue();
+            case FLIPPING:
+                // have we finsihed moving to the flipped position
+                if (flipperPosition >= Constants.FlipperConstants.FLIPPER_TILT_POSITION) {
+                    // if so then have us start moving back
+                    flipperState = FlipperState.RETURNING;
+                    return FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue();
+                } else {
+                    return FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue();
+                }
+            case RETURNING:
+                // have we finsihed moving to the flipped position
+                if (flipperPosition <= Constants.FlipperConstants.FLIPPER_STARTING_POSITION) {
+                    shouldBeFlipping = false;
+                    flipperState = FlipperState.RESET;
+                    // if so then stop and we should be reset
+                    return 0;
+                } else {
+                    // continue resetting tongue
+                    return FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue();
+                }
+            default:
                 return 0;
-            } else {
-                //TODO return the speed to move the motor backwards
-                return 0; //TODO to be removed
-            }
         }
-
-        //TODO What should we do if we haven't hit any of the above? what should the default be
-        return 0; //TODO to be removed
     }
 
-    //called via command
+    // called via command
     public void RunFlipCycle() {
-        //TODO start a flip cycle
+        shouldBeFlipping = true;
     }
 
     /**
@@ -104,6 +120,11 @@ public class FlipperSubsystem extends SubsystemBase {
                     /* one-time action goes here */
                     new FlipCommand(this);
                 });
+    }
+
+    @Override
+    public void close() {
+        flipperMotor.close();
     }
 
 }

@@ -7,9 +7,11 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.FlipCommand;
 import frc.robot.commands.elevator.goToSpecificHeight;
 import frc.robot.subsystems.Elevatorsubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.FlipperSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.swervedrive.*;
 import swervelib.SwerveInputStream;
@@ -53,8 +55,9 @@ public class RobotContainer {
       "swerve/neo"));
 
   private final Elevatorsubsystem elevatorsubsystem = new Elevatorsubsystem();
-
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
+  private final FlipperSubsystem flipperSubsystem = new FlipperSubsystem();
+
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
    * by angular velocity.
@@ -202,11 +205,13 @@ public class RobotContainer {
     Command goToL1 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L1);
     Command goToL2 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L2);
     Command goToL3 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L3);
+    Command flip = new FlipCommand(flipperSubsystem);
 
     m_operatorController.a().whileTrue(goToBottom);
     m_operatorController.x().whileTrue(goToL1);
     m_operatorController.y().whileTrue(goToL2);
     m_operatorController.b().whileTrue(goToL3);
+    m_operatorController.leftBumper().whileTrue(flip);
   }
 
 }
