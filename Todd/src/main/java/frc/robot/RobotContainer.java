@@ -54,60 +54,57 @@ public class RobotContainer {
   private final FlipperSubsystem flipperSubsystem = new FlipperSubsystem();
 
   /**
-   * Converts driver input into a field-relative ChassisSpeeds that is controlled
-   * by angular velocity.
+   * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> m_driverController.getLeftY() * -1,
-      () -> m_driverController.getLeftX() * -1)
-      .withControllerRotationAxis(m_driverController::getRightX)
-      .deadband(OperatorConstants.DEADBAND)
-      .scaleTranslation(0.8)
-      .allianceRelativeControl(true);
+                                                                () -> m_driverController.getLeftX() * -1,
+                                                                () -> m_driverController.getLeftY() * 1)
+                                                            .withControllerRotationAxis(m_driverController::getRightX)
+                                                            .deadband(OperatorConstants.DEADBAND)
+                                                            .scaleTranslation(0.8)
+                                                            .allianceRelativeControl(true);
 
   /**
-   * Clone's the angular velocity input stream and converts it to a fieldRelative
-   * input stream.
+   * Clone's the angular velocity input stream and converts it to a fieldRelative input stream.
    */
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
-      .withControllerHeadingAxis(m_driverController::getRightX,
-          m_driverController::getRightY)
-      .headingWhile(true);
+  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_driverController::getRightX,
+  m_driverController::getRightY)
+                                                           .headingWhile(true);
 
   /**
-   * Clone's the angular velocity input stream and converts it to a robotRelative
-   * input stream.
+   * Clone's the angular velocity input stream and converts it to a robotRelative input stream.
    */
   SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
-      .allianceRelativeControl(false);
+                                                             .allianceRelativeControl(false);
 
   SwerveInputStream driveAngularVelocityKeyboard = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> -m_driverController.getLeftY(),
-      () -> -m_driverController.getLeftX())
-      .withControllerRotationAxis(() -> m_driverController.getRawAxis(
-          2))
-      .deadband(OperatorConstants.DEADBAND)
-      .scaleTranslation(0.8)
-      .allianceRelativeControl(true);
+                                                                        () -> -m_driverController.getLeftY(),
+                                                                        () -> -m_driverController.getLeftX())
+                                                                    .withControllerRotationAxis(() -> m_driverController.getRawAxis(
+                                                                        2))
+                                                                    .deadband(OperatorConstants.DEADBAND)
+                                                                    .scaleTranslation(0.8)
+                                                                    .allianceRelativeControl(true);
   // Derive the heading axis with math!
-  SwerveInputStream driveDirectAngleKeyboard = driveAngularVelocityKeyboard.copy()
-      .withControllerHeadingAxis(() -> Math.sin(
-          m_driverController.getRawAxis(
-              2) *
-              Math.PI)
-          *
-          (Math.PI *
-              2),
-          () -> Math.cos(
-              m_driverController.getRawAxis(
-                  2) *
-                  Math.PI)
-              *
-              (Math.PI *
-                  2))
-      .headingWhile(true);
-
-  /**
+  SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.copy()
+                                                                               .withControllerHeadingAxis(() ->
+                                                                                                              Math.sin(
+                                                                                                                m_driverController.getRawAxis(
+                                                                                                                      2) *
+                                                                                                                  Math.PI) *
+                                                                                                              (Math.PI *
+                                                                                                               2),
+                                                                                                          () ->
+                                                                                                              Math.cos(
+                                                                                                                m_driverController.getRawAxis(
+                                                                                                                      2) *
+                                                                                                                  Math.PI) *
+                                                                                                              (Math.PI *
+                                                                                                               2))
+                                                                               .headingWhile(true)
+                                                                               .translationHeadingOffset(true)
+                                                                               .translationHeadingOffset(Rotation2d.fromDegrees(
+                                                                                   0));  /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
@@ -200,12 +197,14 @@ public class RobotContainer {
     Command goToL1 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L1);
     Command goToL2 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L2);
     Command goToL3 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L3);
+    Command goToLoad = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_LOADING_POSITION);
     Command flip = new FlipCommand(flipperSubsystem);
 
     m_operatorController.a().whileTrue(goToBottom);
     m_operatorController.x().whileTrue(goToL1);
     m_operatorController.y().whileTrue(goToL2);
     m_operatorController.b().whileTrue(goToL3);
+    m_operatorController.rightBumper().whileTrue(goToLoad);
     m_operatorController.leftBumper().whileTrue(flip);
   }
 

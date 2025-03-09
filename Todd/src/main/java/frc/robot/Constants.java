@@ -37,22 +37,22 @@ public final class Constants {
 
     public static final int ELEVATION_MOTOR_ID = 30;
     public static final double ELEVATOR_BOTTOM_POSITION = -1;
-    public static final double ELEVATOR_LOADING_POSITION = -40;
+    public static final double ELEVATOR_LOADING_POSITION = -38;
     public static final double ELEVATOR_L1 = -30;
     public static final double ELEVATOR_L2 = -40;
     public static final double ELEVATOR_L3 = -59;
 
     public static final int BOTTOM_LIMIT_SWITCH_PORT = 0;
-    public static final double ELEVATOR_MOTOR_SPEED_UP = -.25;
-    public static final double ELEVATOR_MOTOR_SPEED_DOWN = .1;
+    public static final double ELEVATOR_MOTOR_SPEED_UP = -.4;
+    public static final double ELEVATOR_MOTOR_SPEED_DOWN = .25;
   
   }
 
   public static final class FlipperConstants {
     public static final int FLIPPER_MOTOR_ID = 31;
-    public static final double FLIPPER_STARTING_POSITION = 0.4;
-    public static final double FLIPPER_TILT_POSITION = 1.25;
-    public static final BigDecimal FLIPPER_MOTOR_FORWARD_SPEED = new BigDecimal(.07);
+    public static final double FLIPPER_STARTING_POSITION = 0.5;
+    public static final double FLIPPER_TILT_POSITION = 1.75;
+    public static final BigDecimal FLIPPER_MOTOR_FORWARD_SPEED = new BigDecimal(.2);
     public static final BigDecimal FLIPPER_MOTOR_BACK_SPEED = new BigDecimal(0);
   }
 
