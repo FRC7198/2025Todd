@@ -70,13 +70,13 @@ public class FlipperSubsystemTests {
                 // Initial state of button press so that flipping should begin
                 Arguments.of(0, FlipperState.RESET, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
                 // Mid Flip Cycle as Encoder Advances
-                Arguments.of(2, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
-                Arguments.of(5, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
+                Arguments.of(.75, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
+                Arguments.of(1, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
                 // We've hit the end of the flip start returning to the original position
                 Arguments.of(FlipperConstants.FLIPPER_TILT_POSITION, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We are mid returning flipper should continue to reset
-                Arguments.of(5, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
-                Arguments.of(2, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
+                Arguments.of(1, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
+                Arguments.of(.5, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We've returned to home position we should be back to reset
                 Arguments.of(FlipperConstants.FLIPPER_STARTING_POSITION, FlipperState.RETURNING, true, 0.0, FlipperState.RESET, false)
                 );
