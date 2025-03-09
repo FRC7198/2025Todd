@@ -6,21 +6,17 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.FlipCommand;
 import frc.robot.commands.elevator.goToSpecificHeight;
 import frc.robot.subsystems.Elevatorsubsystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.FlipperSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.swervedrive.*;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -32,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 /**
@@ -152,7 +147,7 @@ public class RobotContainer {
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
     } else {
-      drivebase.setDefaultCommand(driveSetpointGen);
+      drivebase.setDefaultCommand(driveRobotOrientedAngularVelocity);
     }
 
     if (Robot.isSimulation()) {
