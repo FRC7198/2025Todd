@@ -3,6 +3,8 @@ package   frc.robot.subsystems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import java.util.stream.*;
@@ -47,13 +49,13 @@ public class ElevatorSubsystemTests {
                 //we are at the bottom and need to move to the bottom then don't move
                 Arguments.of(0, Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION, 0.0),
                 // we are in the middle and need to the bottom so move down (positive motor speed)
-                Arguments.of(-50, Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION, .1),
+                Arguments.of(-50, Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION, ElevatorConstants.ELEVATOR_MOTOR_SPEED_DOWN),
                 // we are in the middle and need to the bottom so move to the l1 (positive motor speed)
-                Arguments.of(-50, Constants.ElevatorConstants.ELEVATOR_L1, .1),
+                Arguments.of(-50, Constants.ElevatorConstants.ELEVATOR_L1, ElevatorConstants.ELEVATOR_MOTOR_SPEED_DOWN),
                 // we are at the bottom and need to move up to the first rung so move up (negative motor speed)
-                Arguments.of(Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION, Constants.ElevatorConstants.ELEVATOR_L1, -.1),
+                Arguments.of(Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION, Constants.ElevatorConstants.ELEVATOR_L1, ElevatorConstants.ELEVATOR_MOTOR_SPEED_UP),
                 // we are at the first postion and need to move up to the highest run so move up (negative motor speed)
-                Arguments.of(Constants.ElevatorConstants.ELEVATOR_L1, Constants.ElevatorConstants.ELEVATOR_L3, -.1),
+                Arguments.of(Constants.ElevatorConstants.ELEVATOR_L1, Constants.ElevatorConstants.ELEVATOR_L3, ElevatorConstants.ELEVATOR_MOTOR_SPEED_UP),
                 // we are at close to the l3 position so don't move
                 Arguments.of(Constants.ElevatorConstants.ELEVATOR_L3-1, Constants.ElevatorConstants.ELEVATOR_L3, 0)
                 );

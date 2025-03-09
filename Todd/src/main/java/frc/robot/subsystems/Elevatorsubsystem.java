@@ -29,7 +29,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
     private SparkMax elevatorMotor;
     // private DigitalInput topLimitSwitch = new DigitalInput(0);
-    private DigitalInput bottomLimitSwitch = new DigitalInput(0);
+    private DigitalInput bottomLimitSwitch = new DigitalInput(ElevatorConstants.BOTTOM_LIMIT_SWITCH_PORT);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
 
@@ -49,7 +49,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
     @Override
     public void periodic() {
 
-        Double speed = calculateElevatorMotorSpeed(elevatorEncoder.getPosition(), false, false);
+        Double speed = calculateElevatorMotorSpeed(elevatorEncoder.getPosition(), false, bottomLimitSwitch.get());
         if (speed == 0) {
             stop();
         } else {
@@ -61,42 +61,42 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
         SmartDashboard.putBoolean("isattop", isAtTop(elevatorEncoder.getPosition(), false));
         SmartDashboard.putBoolean("isatbottom", isAtBottom(elevatorEncoder.getPosition(), false));
-
+        SmartDashboard.putBoolean("Elevator bottom limit switch", bottomLimitSwitch.get());
     }
 
     public double calculateElevatorMotorSpeed(double encoderPosition, boolean topLimitSwitch, boolean bottomLimitSwitch) { 
         
         // Stop motor if limit switch is triggered
         BigDecimal speed = new BigDecimal(0.0);
-        logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
+        //work out how far from the position we want to go is
+        double workingPosition = targetPosition - encoderPosition;
+        SmartDashboard.putNumber("workingPosition", workingPosition);
+        //logger.log(Level.INFO,String.format("targetPosition: "+ targetPosition + " encoderPosition: "+encoderPosition));
 
 
         //Are we at the highest elevator point according to the encoder or have we tripped the top limit switch
-        if (isAtTop(encoderPosition, topLimitSwitch)) {
+        if (isAtTop(encoderPosition, topLimitSwitch) && Math.abs(workingPosition) < 1) {
             return 0;
         //Are we at the lowest elevator point according to the encoder or have we tripped the bottom limit switch
-        } else if (isAtBottom(encoderPosition, bottomLimitSwitch)) {
+        } else if (isAtBottom(encoderPosition, bottomLimitSwitch) && Math.abs(workingPosition) < 1) {
             return 0;
         } else {
             // Move towards target position
 
-            //work out how far from the position we want to go is
-            double workingPosition = targetPosition - encoderPosition;
-            SmartDashboard.putNumber("workingPosition", workingPosition);
-            logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
+           // logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
             // Are we above where we need to go and are we farther away than one encoder pulse?
             if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
             {
-                logger.log(Level.INFO,String.format("Go Up"));
-                // Go Up
-                speed = BigDecimal.valueOf(0.1);
+                //logger.log(Level.INFO,String.format("Go Up"));
+                // Go down
+                speed = BigDecimal.valueOf(ElevatorConstants.ELEVATOR_MOTOR_SPEED_DOWN);
                 
             //Are we below we we need to go and are we farther away than 1 encoder pulse?
             } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > 1) {
                 // Go Up
-                speed = BigDecimal.valueOf(-0.1);
+                speed = BigDecimal.valueOf(ElevatorConstants.ELEVATOR_MOTOR_SPEED_UP);
             } else if(Math.abs(workingPosition) < 1) {
-                logger.log(Level.INFO,String.format("We are close so stop"));
+               // logger.log(Level.INFO,String.format("We are close so stop"));
                 return 0;
             }
             return speed.doubleValue();
@@ -122,14 +122,14 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         // Constants.ElevatorConstants.ELEVATOR_L3;
         // }
         Boolean isAtTop = encoderPosition < Constants.ElevatorConstants.ELEVATOR_L3;
-        logger.log(Level.INFO,String.format("isAtTop: "+ isAtTop.toString()));
+        //logger.log(Level.INFO,String.format("isAtTop: "+ isAtTop.toString()));
         return isAtTop;
     }
 
     public boolean isAtBottom(double encoderPosition, boolean bottomLimitSwitch) {
-        Boolean isAtBottom = encoderPosition > Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
-        logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
-        return isAtBottom;
+        Boolean isAtBottomPosition = encoderPosition <= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
+        //logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
+        return (isAtBottomPosition || bottomLimitSwitch);
     }
 
     @Override
