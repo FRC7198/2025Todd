@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -32,6 +33,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
     private DigitalInput bottomLimitSwitch = new DigitalInput(ElevatorConstants.BOTTOM_LIMIT_SWITCH_PORT);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
+    private Timer resetTimer = new Timer();
 
     public Elevatorsubsystem() {
 
@@ -54,6 +56,13 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
             stop();
         } else {
             elevatorMotor.set(speed); // Adjust speed as needed
+        }
+
+        if(!bottomLimitSwitch.get()) {
+            resetTimer.restart();
+        } else if(resetTimer.hasElapsed(2) && elevatorEncoder.getPosition() != 0) {
+            elevatorEncoder.setPosition(0);
+            resetTimer.restart();
         }
 
         SmartDashboard.putNumber("elevatorspeed", speed);
