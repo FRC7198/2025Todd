@@ -62,21 +62,20 @@ public class FlipperSubsystemTests {
         assertEquals(expectedIsInFlipCycle, flipperSubsystem.getIsInFlipCycle());
 
     }
-
+    
+    private static double midPointFlipPosition = (FlipperConstants.FLIPPER_STARTING_POSITION + FlipperConstants.FLIPPER_TILT_POSITION)/2;
     private static Stream<Arguments> flipperTestCases() {
         return Stream.of(
                 // Intitial just turned on state should not move the flipper
-                Arguments.of(0, FlipperState.RESET, false, 0.0, FlipperState.RESET, false),
+                Arguments.of(FlipperConstants.FLIPPER_STARTING_POSITION -.1, FlipperState.RESET, false, 0.0, FlipperState.RESET, false),
                 // Initial state of button press so that flipping should begin
-                Arguments.of(0, FlipperState.RESET, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
+                Arguments.of(FlipperConstants.FLIPPER_STARTING_POSITION -.1, FlipperState.RESET, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
                 // Mid Flip Cycle as Encoder Advances
-                Arguments.of(.75, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
-                Arguments.of(1, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
+                Arguments.of(midPointFlipPosition, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue(), FlipperState.FLIPPING, true),
                 // We've hit the end of the flip start returning to the original position
                 Arguments.of(FlipperConstants.FLIPPER_TILT_POSITION, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We are mid returning flipper should continue to reset
-                Arguments.of(1, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
-                Arguments.of(.5, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
+                Arguments.of(midPointFlipPosition, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We've returned to home position we should be back to reset
                 Arguments.of(FlipperConstants.FLIPPER_STARTING_POSITION, FlipperState.RETURNING, true, 0.0, FlipperState.RESET, false)
                 );
