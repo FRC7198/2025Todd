@@ -76,7 +76,7 @@ public class FlipperSubsystemTests {
                 Arguments.of(FlipperConstants.FLIPPER_TILT_POSITION, FlipperState.FLIPPING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We are mid returning flipper should continue to reset
                 Arguments.of(1, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
-                Arguments.of(.5, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
+                Arguments.of(.6, FlipperState.RETURNING, true, FlipperConstants.FLIPPER_MOTOR_BACK_SPEED.doubleValue(), FlipperState.RETURNING, true),
                 // We've returned to home position we should be back to reset
                 Arguments.of(FlipperConstants.FLIPPER_STARTING_POSITION, FlipperState.RETURNING, true, 0.0, FlipperState.RESET, false)
                 );

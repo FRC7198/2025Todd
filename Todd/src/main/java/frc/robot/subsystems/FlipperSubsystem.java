@@ -6,6 +6,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,6 +20,7 @@ public class FlipperSubsystem extends SubsystemBase implements AutoCloseable {
     private RelativeEncoder flipperEncoder;
     private FlipperState flipperState = FlipperState.RESET;
     private boolean shouldBeFlipping = false;
+    private Timer flipperTimer = new Timer();
 
     public enum FlipperState {
         FLIPPING, // flipping the tongue out
@@ -50,14 +52,25 @@ public class FlipperSubsystem extends SubsystemBase implements AutoCloseable {
 
         //if we are not in a flip command no need to calculcate speed
         if (!shouldBeFlipping) {
+            flipperTimer.restart();
             return;
         }
         // This method will be called once per scheduler run
+        /* 
         double flipperMotorSpeed = flip(flipperEncoder.getPosition());
         if (flipperMotorSpeed == 0) {
             flipperMotor.stopMotor();
         } else {
             flipperMotor.set(flipperMotorSpeed);
+        }
+        */
+        if(flipperTimer.hasElapsed(1)) {
+            shouldBeFlipping = false;
+            flipperState = FlipperState.RESET;
+            flipperTimer.restart();
+            flipperMotor.stopMotor();
+        } else {
+            flipperMotor.set(FlipperConstants.FLIPPER_MOTOR_FORWARD_SPEED.doubleValue());
         }
 
     }
