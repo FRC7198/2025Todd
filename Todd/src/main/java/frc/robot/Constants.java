@@ -23,7 +23,7 @@ public final class Constants {
   public static final double ROBOT_MASS = (148 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS    = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME  = 0.13; //s, 20ms + 110ms sprk max velocity lag
-  public static final double MAX_SPEED  = Units.feetToMeters(7);
+  public static final double MAX_SPEED  = Units.feetToMeters(9);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 
 //  public static final class AutonConstants
@@ -37,15 +37,19 @@ public final class Constants {
 
     public static final int ELEVATION_MOTOR_ID = 30;
     public static final double ELEVATOR_BOTTOM_POSITION = -1;
-    public static final double ELEVATOR_LOADING_POSITION = -38;
-    public static final double ELEVATOR_L1 = -30;
-    public static final double ELEVATOR_L2 = -36;
-    public static final double ELEVATOR_L3 = -51.5;
+    public static final double ELEVATOR_LOADING_POSITION = -69.2
+    ;
+    public static final double ELEVATOR_L1 = -53.7;
+    public static final double ELEVATOR_L2 = -65.5;
+    public static final double ELEVATOR_L3 = -96.4;
 
     public static final int BOTTOM_LIMIT_SWITCH_PORT = 0;
-    public static final double ELEVATOR_MOTOR_SPEED_UP = -.4;
-    public static final double ELEVATOR_MOTOR_SPEED_DOWN = .25;
-  
+    public static final double ELEVATOR_MOTOR_SPEED_UP = -.5;
+    public static final double ELEVATOR_MOTOR_SPEED_DOWN = .44;
+
+    public static final double ELEVATOR_MOTOR_MANUAL_RAISE_SPEED = -.15;
+    public static final double ELEVATOR_MOTOR_MANUAL_LOWER_SPEED = .15;
+    public static final double ELEVATOR_DRIFT_DIFFERENCE_BEFORE_CORRECTION = .5;
   }
 
   public static final class FlipperConstants {

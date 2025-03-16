@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.FlipCommand;
+import frc.robot.commands.elevator.LowerElevator;
+import frc.robot.commands.elevator.RaiseElevator;
 import frc.robot.commands.elevator.goToSpecificHeight;
 import frc.robot.subsystems.Elevatorsubsystem;
 import frc.robot.subsystems.FlipperSubsystem;
@@ -183,8 +185,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    double xtranslation = .5;
     // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("New Auto");
+    return drivebase.driveCommand( () -> 0, () -> 0.5, () -> 0).withTimeout(2);
+   // return null; // drivebase.getAutonomousCommand("New Auto");
   }
 
   public void setMotorBrake(boolean brake) {
@@ -199,6 +203,8 @@ public class RobotContainer {
     Command goToL3 = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_L3);
     Command goToLoad = new goToSpecificHeight(elevatorsubsystem, Constants.ElevatorConstants.ELEVATOR_LOADING_POSITION);
     Command flip = new FlipCommand(flipperSubsystem);
+    Command lowerElevator = new LowerElevator(elevatorsubsystem);
+    Command raiseElevator = new RaiseElevator(elevatorsubsystem);
 
     m_operatorController.a().whileTrue(goToBottom);
     m_operatorController.x().whileTrue(goToL1);
@@ -206,6 +212,11 @@ public class RobotContainer {
     m_operatorController.b().whileTrue(goToL3);
     m_operatorController.rightBumper().whileTrue(goToLoad);
     m_operatorController.leftBumper().whileTrue(flip);
+
+    m_operatorController.leftTrigger().whileTrue(lowerElevator);
+    m_operatorController.rightTrigger().whileTrue(raiseElevator);
+   // m_operatorController.rightTrigger().whileTrue(elevatorsubsystem.goUp());
+
   }
 
 }

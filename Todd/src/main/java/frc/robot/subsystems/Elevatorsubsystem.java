@@ -9,9 +9,11 @@ import java.util.logging.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.commands.elevator.goToSpecificHeight;
 
 
 
@@ -32,6 +34,8 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
     private DigitalInput bottomLimitSwitch = new DigitalInput(ElevatorConstants.BOTTOM_LIMIT_SWITCH_PORT);
     private double targetPosition;
     private RelativeEncoder elevatorEncoder;
+    private boolean raising = false;
+    private boolean lowering = false;
 
     public Elevatorsubsystem() {
 
@@ -48,6 +52,12 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
+
+        if(raising) {
+            targetPosition += ElevatorConstants.ELEVATOR_MOTOR_MANUAL_RAISE_SPEED;
+        } else if (lowering) {
+            targetPosition += ElevatorConstants.ELEVATOR_MOTOR_MANUAL_LOWER_SPEED;
+        }
 
         Double speed = calculateElevatorMotorSpeed(elevatorEncoder.getPosition(), false, bottomLimitSwitch.get());
         if (speed == 0) {
@@ -85,14 +95,15 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
            // logger.log(Level.INFO,String.format("workingPosition: "+ workingPosition));
             // Are we above where we need to go and are we farther away than one encoder pulse?
-            if (encoderPosition < targetPosition &&  Math.abs(workingPosition) > 1)
+            if (encoderPosition < targetPosition && Math.abs(workingPosition) > ElevatorConstants.ELEVATOR_DRIFT_DIFFERENCE_BEFORE_CORRECTION)
             {
+       
                 //logger.log(Level.INFO,String.format("Go Up"));
                 // Go down
                 speed = BigDecimal.valueOf(ElevatorConstants.ELEVATOR_MOTOR_SPEED_DOWN);
                 
             //Are we below we we need to go and are we farther away than 1 encoder pulse?
-            } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > 1) {
+            } else if (encoderPosition > targetPosition && Math.abs(workingPosition) > ElevatorConstants.ELEVATOR_DRIFT_DIFFERENCE_BEFORE_CORRECTION) {
                 // Go Up
                 speed = BigDecimal.valueOf(ElevatorConstants.ELEVATOR_MOTOR_SPEED_UP);
             } else if(Math.abs(workingPosition) < 1) {
@@ -129,13 +140,27 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
     public boolean isAtBottom(double encoderPosition, boolean bottomLimitSwitch) {
         Boolean isAtBottomPosition = encoderPosition <= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
         //logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
-        return (isAtBottomPosition || bottomLimitSwitch);
+        return (bottomLimitSwitch || isAtBottomPosition);
     }
 
     @Override
     public void close()  {
         elevatorMotor.close();
         bottomLimitSwitch.close();
+    }
+
+    public void raise() {
+        raising = true;
+    }
+
+    public void lower() {
+        lowering = true;        
+    }
+
+    public void triggerReset() {
+        //return runOnce(null)
+        lowering = false;
+        raising = false;
     }
 
 }
