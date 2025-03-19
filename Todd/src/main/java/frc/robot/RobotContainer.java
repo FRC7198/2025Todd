@@ -188,7 +188,6 @@ public class RobotContainer {
     double xtranslation = .5;
     // An example command will be run in autonomous
     return drivebase.driveCommand( () -> 0, () -> 0.5, () -> 0).withTimeout(2);
-   // return null; // drivebase.getAutonomousCommand("New Auto");
   }
 
   public void setMotorBrake(boolean brake) {

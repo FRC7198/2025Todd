@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.Objects;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,6 +21,7 @@ public class LEDSubsystem extends SubsystemBase {
   // Create an LED pattern that sets the entire strip to solid red
   LEDPattern red = LEDPattern.solid(Color.kRed);
   LEDPattern blue = LEDPattern.solid(Color.kGreen); //wires are swapped so green is actually blue
+  private Alliance currentAlliance;
 
   // https://docs.wpilib.org/en/stable/docs/software/hardware-apis/misc/addressable-leds.html
   public LEDSubsystem() {
@@ -27,12 +30,7 @@ public class LEDSubsystem extends SubsystemBase {
     m_led.setLength(kLength);
     m_led.start();
 
-    // Apply the LED pattern to the data buffer
-    if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red) {
-      red.applyTo(m_buffer);
-    } else {
-      blue.applyTo(m_buffer);
-    }
+    checkAllianceColors(DriverStation.getAlliance().orElse(Alliance.Red));
     // Set the default command to turn the strip off, otherwise the last colors
     // written by
     // the last command to run will continue to be displayed.
@@ -48,6 +46,23 @@ public class LEDSubsystem extends SubsystemBase {
     // Periodically send the latest LED color data to the LED strip for it to
     // display
     m_led.setData(m_buffer);
+  }
+
+  private void checkAllianceColors(Alliance alliance) {
+
+    if(Objects.nonNull(alliance) && alliance == currentAlliance) {
+      return; //Alliance hasn't changed no need to set the colors;
+    } else {
+      currentAlliance = alliance;
+
+      // Apply the LED pattern to the data buffer
+      if (alliance == Alliance.Red) {
+        red.applyTo(m_buffer);
+      } else {
+        blue.applyTo(m_buffer);
+      }  
+    }
+
   }
 
   /**
