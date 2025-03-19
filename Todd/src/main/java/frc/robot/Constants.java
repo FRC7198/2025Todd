@@ -43,7 +43,7 @@ public final class Constants {
     public static final double ELEVATOR_L2 = -65.5;
     public static final double ELEVATOR_L3 = -96.4;
 
-    public static final int BOTTOM_LIMIT_SWITCH_PORT = 0;
+    public static final int BOTTOM_LIMIT_SWITCH_PORT = 9;
     public static final double ELEVATOR_MOTOR_SPEED_UP = -.5;
     public static final double ELEVATOR_MOTOR_SPEED_DOWN = .44;
 

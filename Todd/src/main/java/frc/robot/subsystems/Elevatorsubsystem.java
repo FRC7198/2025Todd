@@ -52,6 +52,11 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("targetposition", targetPosition);
+        SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
+        SmartDashboard.putBoolean("isattop", isAtTop(elevatorEncoder.getPosition(), false));
+        SmartDashboard.putBoolean("isatbottom", isAtBottom(elevatorEncoder.getPosition(), false));
+        SmartDashboard.putBoolean("Elevator bottom limit switch", bottomLimitSwitch.get());
 
         if(raising) {
             targetPosition += ElevatorConstants.ELEVATOR_MOTOR_MANUAL_RAISE_SPEED;
@@ -65,13 +70,8 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
         } else {
             elevatorMotor.set(speed); // Adjust speed as needed
         }
-
         SmartDashboard.putNumber("elevatorspeed", speed);
-        SmartDashboard.putNumber("targetposition", targetPosition);
-        SmartDashboard.putNumber("elevatorencoderpos", elevatorEncoder.getPosition());
-        SmartDashboard.putBoolean("isattop", isAtTop(elevatorEncoder.getPosition(), false));
-        SmartDashboard.putBoolean("isatbottom", isAtBottom(elevatorEncoder.getPosition(), false));
-        SmartDashboard.putBoolean("Elevator bottom limit switch", bottomLimitSwitch.get());
+
     }
 
     public double calculateElevatorMotorSpeed(double encoderPosition, boolean topLimitSwitch, boolean bottomLimitSwitch) { 
@@ -138,7 +138,7 @@ public class Elevatorsubsystem extends SubsystemBase implements AutoCloseable {
     }
 
     public boolean isAtBottom(double encoderPosition, boolean bottomLimitSwitch) {
-        Boolean isAtBottomPosition = encoderPosition <= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
+        Boolean isAtBottomPosition = encoderPosition >= Constants.ElevatorConstants.ELEVATOR_BOTTOM_POSITION;
         //logger.log(Level.INFO,"isAtBottom: "+ isAtBottom.toString());
         return (bottomLimitSwitch || isAtBottomPosition);
     }
