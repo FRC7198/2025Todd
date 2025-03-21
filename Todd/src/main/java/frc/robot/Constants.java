@@ -49,7 +49,7 @@ public final class Constants {
 
     public static final double ELEVATOR_MOTOR_MANUAL_RAISE_SPEED = -.15;
     public static final double ELEVATOR_MOTOR_MANUAL_LOWER_SPEED = .15;
-    public static final double ELEVATOR_DRIFT_DIFFERENCE_BEFORE_CORRECTION = .5;
+    public static final double ELEVATOR_DRIFT_DIFFERENCE_BEFORE_CORRECTION = 1;
   }
 
   public static final class FlipperConstants {
